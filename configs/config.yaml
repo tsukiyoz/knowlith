@@ -1,1 +1,8 @@
 apiserver:
+  http:
+    addr: 0.0.0.0:8081
+    
+log:
+  format: text
+  level: info
+  output: stdout
