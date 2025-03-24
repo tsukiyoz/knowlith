@@ -11,8 +11,6 @@ import (
 var configFile string
 
 func NewRootCommand() *cobra.Command {
-	cobra.OnInitialize(onInitialize)
-
 	command := &cobra.Command{
 		Use:   "knowlith",
 		Short: "knowlith",
@@ -22,6 +20,12 @@ func NewRootCommand() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 			os.Exit(0)
+		},
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if cmd.Parent() == nil {
+				return
+			}
+			serverInitialize()
 		},
 	}
 

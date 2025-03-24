@@ -16,12 +16,19 @@ const (
 	defaultConfigName = "config.yaml"
 )
 
-func onInitialize() {
-	initLog()
-	initConfig()
+func serverInitialize() {
+	callbacks := []func(){
+		initConfig(),
+		initLog(),
+	}
+	for _, cb := range callbacks {
+		if cb != nil {
+			cb()
+		}
+	}
 }
 
-func initConfig() {
+func initConfig() func() {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
 	} else {
@@ -30,13 +37,18 @@ func initConfig() {
 		}
 
 		viper.SetConfigType("yaml")
-
 		viper.SetConfigName(defaultConfigName)
 	}
 
 	setupEnvironmentVariables()
 	_ = viper.ReadInConfig()
-	slog.Info("Config initialized success.")
+
+	return func() {
+		slog.Info(
+			"Config initialized success.",
+			slog.String("config file", configFile),
+		)
+	}
 }
 
 func setupEnvironmentVariables() {
@@ -58,7 +70,7 @@ func filePath() string {
 	return filepath.Join(home, defaultHomeDir, defaultConfigName)
 }
 
-func initLog() {
+func initLog() func() {
 	// 获取日志配置
 	format := viper.GetString("log.format") // 日志格式，支持：json、text
 	level := viper.GetString("log.level")   // 日志级别，支持：debug, info, warn, error
@@ -98,7 +110,7 @@ func initLog() {
 
 	// 转换日志格式
 	if err != nil {
-		return
+		return nil
 	}
 	var handler slog.Handler
 	switch format {
@@ -113,5 +125,13 @@ func initLog() {
 
 	// 设置全局的日志实例为自定义的日志实例
 	slog.SetDefault(slog.New(handler))
-	slog.Info("Log initialized success.")
+
+	return func() {
+		slog.Info(
+			"Log initialized success.",
+			slog.String("format", format),
+			slog.String("level", level),
+			slog.String("output", output),
+		)
+	}
 }
