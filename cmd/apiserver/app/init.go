@@ -1,4 +1,4 @@
-package cmd
+package app
 
 import (
 	"io"
@@ -15,18 +15,6 @@ const (
 	defaultHomeDir    = ".knowlith"
 	defaultConfigName = "config.yaml"
 )
-
-func serverInitialize() {
-	callbacks := []func(){
-		initConfig(),
-		initLog(),
-	}
-	for _, cb := range callbacks {
-		if cb != nil {
-			cb()
-		}
-	}
-}
 
 func initConfig() func() {
 	if configFile != "" {

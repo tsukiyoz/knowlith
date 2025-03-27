@@ -12,10 +12,10 @@ type ErrorResponse struct {
 
 func WriteResponse(c *fiber.Ctx, data any, err error) error {
 	if err != nil {
-		errx := errorsx.FromError(err)
-		return c.Status(errx.Code).JSON(ErrorResponse{
-			Reason:  errx.Reason,
-			Message: errx.Message,
+		e := errorsx.FromError(err)
+		return c.Status(e.Code).JSON(ErrorResponse{
+			Reason:  e.Reason,
+			Message: e.Message,
 		})
 	}
 

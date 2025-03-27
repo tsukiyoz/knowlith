@@ -1,0 +1,52 @@
+services:
+  tyk-gateway:
+    image: docker.tyk.io/tyk-gateway/tyk-gateway:latest
+    ports:
+      - 8080:8080
+    networks:
+      - knowlith
+    volumes:
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/apps:/opt/tyk-gateway/apps
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/middleware:/opt/tyk-gateway/middleware
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/certs:/opt/tyk-gateway/certs
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/policies:/opt/tyk-gateway/policies
+    environment:
+      - TYK_GW_SECRET=knowlith
+    depends_on:
+      - tyk-redis
+  tyk-redis:
+    image: redis:6.2.7-alpine
+    networks:
+      - knowlith
+    ports:
+      - 6379:6379
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.21
+    container_name: etcd
+    networks:
+      - knowlith
+    ports:
+      - 2379:2379  # 客户端访问端口
+      - 2380:2380  # 节点通信端口
+    volumes:
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/etcd/data:/etcd-data  # 持久化数据目录
+    environment:
+      - ETCD_NAME=s1
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379  # 使用服务名内部访问
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER=s1=http://etcd:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=tkn
+      - ETCD_INITIAL_CLUSTER_STATE=new
+    healthcheck:
+      test: [ "CMD", "etcdctl", "endpoint", "health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+networks:
+  knowlith:
+    driver: bridge
+    name: knowlith

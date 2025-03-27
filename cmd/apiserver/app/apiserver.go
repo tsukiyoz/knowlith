@@ -1,18 +1,13 @@
-package apiserver
+package app
 
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	cmd "github.com/tsukiyoz/knowlith/cmd/app"
-	"github.com/tsukiyoz/knowlith/cmd/app/apiserver/options"
+	"github.com/tsukiyoz/knowlith/cmd/apiserver/app/options"
 	"github.com/tsukiyoz/knowlith/pkg/version"
 )
 
-var ServerName = "apiserver"
-
-func init() {
-	cmd.Register(ServerName, NewAPIServerCommand())
-}
+var configFile string
 
 func NewAPIServerCommand() *cobra.Command {
 	opts := options.NewServerOptions()
@@ -28,6 +23,12 @@ func NewAPIServerCommand() *cobra.Command {
 		Args: cobra.NoArgs,
 	}
 
+	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", filePath(), "Path to config file.")
+
+	cobra.OnInitialize(initConfig(), initLog())
+	
+	version.AddFlags(cmd.PersistentFlags())
+
 	return cmd
 }
 
@@ -36,12 +37,6 @@ func run(opts *options.ServerOptions) error {
 
 	if err := viper.Unmarshal(opts); err != nil {
 		return err
-	}
-
-	if serverCfg := viper.Sub(ServerName); serverCfg != nil {
-		if err := serverCfg.Unmarshal(opts); err != nil {
-			return err
-		}
 	}
 
 	if err := opts.Validate(); err != nil {
