@@ -1,0 +1,34 @@
+services:
+  tyk-gateway:
+    image: docker.tyk.io/tyk-gateway/tyk-gateway:latest
+    ports:
+      - 8080:8080
+    networks:
+      - gateway
+      - public
+    volumes:
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/tyk.standalone.conf:/opt/tyk-gateway/tyk.conf
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/apps:/opt/tyk-gateway/apps
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/middleware:/opt/tyk-gateway/middleware
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/certs:/opt/tyk-gateway/certs
+      - ${KNOWLITH_SERVICE_VOLUMES_DIR}/tyk/policies:/opt/tyk-gateway/policies
+    environment:
+      - TYK_GW_SECRET=knowlith
+    depends_on:
+      - tyk-redis
+  tyk-redis:
+    image: redis:6.2.7-alpine
+    networks:
+      - gateway
+    ports:
+      - 6379:6379
+
+networks:
+  gateway:
+    driver: bridge
+    internal: true
+  app:
+    driver: bridge
+  public:
+    driver: bridge
+    name: public
