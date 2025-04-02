@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/tsukiyoz/knowlith/cmd/apiserver/app"
 	"os"
+
+	"github.com/tsukiyoz/knowlith/cmd/apiserver/app"
 )
 
 func main() {

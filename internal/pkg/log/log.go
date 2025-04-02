@@ -59,3 +59,7 @@ func Fatalw(msg string, kvs ...any) {
 func W(ctx context.Context) Logger {
 	return std
 }
+
+func Sync() {
+	std.Sync()
+}

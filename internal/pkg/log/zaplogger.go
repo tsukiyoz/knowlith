@@ -2,11 +2,12 @@ package log
 
 import (
 	"context"
+	"time"
+
 	"github.com/tsukiyoz/knowlith/internal/pkg/contextx"
 	"github.com/tsukiyoz/knowlith/internal/pkg/known"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 func newZapLogger(opts *Options) *zapLogger {
